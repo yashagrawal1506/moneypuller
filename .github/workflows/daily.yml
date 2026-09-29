@@ -1,0 +1,92 @@
+name: daily-update
+
+on:
+  schedule:
+    - cron: "45 10 * * 1-5"   # 10:45 UTC = 16:15 IST, Mon-Fri (after close)
+  workflow_dispatch: {}        # manual run button
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: daily-update
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # --- DB state: actions cache (rotating key) with the committed seed
+      # as day-1 fallback. restore-keys picks the latest successful run's
+      # DB even though the exact key (run_id) differs each time.
+      - name: Restore cached database
+        id: dbcache
+        uses: actions/cache@v4
+        with:
+          path: data/moneypuller.db
+          key: moneypuller-db-${{ github.run_id }}
+          restore-keys: moneypuller-db-
+
+      - name: Seed DB if cache was empty
+        if: steps.dbcache.outputs.cache-hit != 'true'
+        run: |
+          if [ ! -f data/moneypuller.db ] && [ -f data/db_seed.gz ]; then
+            echo "restoring DB from committed seed"
+            gunzip -c data/db_seed.gz > data/moneypuller.db
+          fi
+
+      - name: Run daily update (cloud mode)
+        env:
+          MP_PAUSE: "1.2"
+        run: python daily_update.py --cloud
+
+      - name: DB summary
+        run: |
+          python - <<'EOF'
+          import sqlite3
+          conn = sqlite3.connect("data/moneypuller.db")
+          for name, q in [
+              ("articles", "SELECT COUNT(*) FROM articles"),
+              ("leads", "SELECT COUNT(*) FROM recommendations"),
+              ("verdicts", "SELECT COUNT(*) FROM verdicts"),
+          ]:
+              try:
+                  print(f"{name}: {conn.execute(q).fetchone()[0]}")
+              except Exception as e:
+                  print(f"{name}: ({e})")
+          EOF
+
+      - name: Assemble site
+        run: python make_site.py
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy-pages:
+    needs: update
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

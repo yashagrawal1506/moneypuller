@@ -1,0 +1,71 @@
+﻿start_ts,end_ts,stock,stock_variants,action,entry,target_1,target_2,target_3,stop_loss,expert,horizon,confidence,notes
+11:15,15:33,Maruti Suzuki India,Maruti,Buy,,12450,,,11600,निथिलेश (Nithilesh),intraday-position,medium,"buy 11900-12085 zone (ASR-garbled '11 11,900'); strict SL 11800 per anchor recap; bounce target 12450-12500; if 11800 breaks and holds, 10200 downside (not part of call)"
+24:52,27:40,Gold MCX (commodity),,Sell,,149500,,151000,152000,दिनेश (Dinesh),intraday,medium,"gold Dec contract sell around 151000, SL 152000, downside 149500; commodity - excluded from equity evaluation"
+44:42,50:09,Torrent Pharmaceuticals,TNT Farma; Torrent Farma,Buy,,5300,,,4800,रवि (Ravi),positional,high,price ~5000; target 5300; SL 4800; breakout Friday + derivatives data positive
+44:42,50:09,Himadri Speciality Chemical,himatri cmical,Buy,,720,,,679,रवि (Ravi),positional,medium,"price ~679; target 720; SL 679 (very tight, as heard); name garbled in ASR"
+51:22,54:16,Petronet LNG,पेट्रोन एट एलएg,Buy,,345,,,,मिताली (brokerage: Nomura),positional,high,Nomura buy rating TP 345; Kochi terminal utilisation; pipeline complete Mar 2027
+1:39:06,1:44:31,Bank of Maharashtra,बैंक ऑफ महाराष्ट्र,Buy,84,88,92,,81,,positional-15d,high,"attractive at 84, SL 81, targets 88 and 92, 15-day positional"
+1:49:13,1:52:48,South Indian Bank,साउथ इंडियन बैंक,Buy,47.48,56,62,,42.8,,positional-15-20d,high,if opening near 47.48 buy; targets 56 then 62; SL 42.80 (ASR wrote 4748; NSE price scale ~47)
+2:07:04,2:09:51,Zydus Lifesciences,Zाइडस लाइफ; ZDS Life,Buy,,1250,,,1180,शिवांगी / प्रदीप,positional,high,"continuous long build-up; target 1250, SL 1180; reiterated at 2:26"
+2:12:42,2:15:07,Dr Reddys Laboratories,डॉ. रेड्डीज लैब; DRL,Buy,,1740,,,,Nomura (brokerage),positional,high,"Nomura maintains buy, 1740 target, arthritis drug approval hopes"
+2:18:03,2:20:22,Oracle Financial Services; Tata Consultancy Services,IT pack,Weak,,,,,,(निमेश जी),sector,low,"IT: OFS+TCS strength; Persistent/Wipro/HCL/Mphasis selling; sector view, no levels"
+2:23:48,2:25:18,SBI Cards & Payment Services,SBI कार्ड,Sell,,565,,,625,प्रदीप,positional,high,"short below previous swing low; SL 625, target 565; trailing SL advised"
+2:34:19,2:38:40,Tech Mahindra (probable),HDFC?; buyback Rs 900cr news,Buy,,1600,,,1490,शिवांगी,positional,medium,"levels res 1535, T 1600, SL 1490 fit Tech Mahindra (close 1548); ASR name garbled - probable"
+2:54:23,2:57:06,Max Financial Services,मैक्स फाइनेंशियल,Buy,1450,1500,1550,,1400,दीपक,positional,high,buy 1450-1451; SL 1400; T1 1500 T2 1550
+2:58:05,3:00:24,"Unidentified stock (insurance cross-sell news, 210-214 zone)",आईआईटीआई; IIFL?; DCB Bank?,Watch,,,,,,दीपक?,positional,low,"'if 210-214 breaks, downside 200/180'; IIFL Finance trades ~608 (mismatch), DCB ~214 fits; name unresolved - MANUAL REVIEW, no evaluation"
+3:04:54,3:10:32,Gold MCX Dec contract (commodity),,Sell,,149500,,151000,152000,दिनेश,intraday,medium,repeat of gold call; excluded (commodity)
+3:38:08,3:40:00,Bank of India,बैंक ऑफ इंडिया,Weak,,,,,,अक्षय,positional,low,avoid; wait 120-125 zone for fresh buying (BoI ~130 now); Yes Bank answer not captured
+3:41:09,3:45:26,HDFC AMC,AMC,Weak,,,,,,अक्षय,positional,low,avoid; downside open 120-125; no fresh position
+3:48:56,3:51:34,NALCO,NACO; Nalco,Weak,,,,,,अक्षय,positional,low,3% down; 1-yr +70% but no levels; avoid short
+3:54:45,3:55:44,Balkrishna Industries,बाल कृष्णा Industries,Buy,,2550,,,,गौरांग (Gaurang),investment-1y,medium,auto sector to improve; target 2550; 1-year+ horizon; add on dips
+4:08:10,4:16:45,Crude Oil MCX (commodity),,Buy,8950,9150,,,8800,अनुज,intraday-positional,medium,crude buy on dips; silver sell bounce 29000-30000 (SL garbled); commodity - excluded
+4:39:00,4:40:15,Dixon Technologies,dicson,Buy,13550,13900,,,13200,स्वाति? (Swati),positional,high,"if 13550 breaks and sustains long, SL 13200, target 13900"
+4:41:47,4:44:02,LIC Housing Finance,LIC Hous,Watch,,,,,,,positional,high,LIC HFC trades ~568; levels 302/305/282 spoken adjacent likely belong to Petronet; manual review
+4:41:47,4:44:02,Larsen & Toubro,LNT,Watch,,,,,,स्वाति?,positional,high,"qualitative: failed recovery, declining trend; spoken levels 1150-1170/SL 1220 do not fit L&T (3857) - they match Jindal Steel (separate row)"
+4:45:55,4:47:58,Bank of Baroda,बैंक ऑफ बड़ौदा,Sell,230,,,,235,स्वाति?,positional,medium,stock at 230; weaker structure; short with SL 235; downside toward 220
+4:53:34,4:54:22,Vodafone Idea,Vodafone Idea,Weak,,,,,,अक्षय,positional,low,support 113-114 watch; no trade call
+5:00:15,5:03:12,BPCL/HPCL/IOCL (OMC sector),,Weak,,,,,,,sector,low,crude boil hurting OMCs/aviation/cement/paints/tyres; no single-stock call
+5:09:01,5:10:50,Tata Motors,Tata Motors,Buy,,,,,,निथिलेश (Nithilesh),positional,low,"pick after auto numbers Oct 1; levels ASR-garbled (CMP ~740, 'E:106', 'T:460' inconsistent) - needs manual review"
+5:21:09,5:23:12,IRB Infrastructure,irrb infra,Watch,,,,,,लक्ष्मीकांत,positional,medium,viewer entry 26; 52-wk low ~19; negative sentiment; no fresh trade call
+5:40:36,5:43:11,Mrs Bectors Food,मिसेस बेक्टर्स; MS Bytes,Buy,,289,,,,विनीत (Vineet),investment-24m,medium,"premium biscuit/bakery; target 289, 24-month horizon; no SL"
+5:44:26,5:45:31,LG Electronics India,LJ/LG इलेक्ट्रॉनिक्स,Buy,,,,,,विनीत,investment-24m,low,'20194' ASR-garbled level dropped; listed Oct 2025; direction buy (no usable target). Manual review
+5:47:47,5:49:27,Park Mediworld (Hospital),पाक स्ट्रीट; Park medworded,Buy,,397,,,,विनीत,investment-24m,medium,"recently listed hospital chain; 10,000 beds target; 40-50% upside 2-3 yrs; target 397; listing/symbol needs verification"
+5:51:13,5:54:57,TVS Motor Company,TVS मोटर,Buy,,4780,,,,विनीत,investment-12m,high,"auto pick; target 4780, 1-year horizon; add if results positive"
+5:55:55,5:57:27,Meesho,MSHO; Meesho,Buy,,295,,,,विनीत / गौरांग,investment,high,Meesho target 295 (12m); unlisted - cannot evaluate
+5:57:27,5:58:48,Mankind Pharmaceuticals,मैनकाइंड फार्मा,Buy,,2700,,,,गौरांग,investment-12m,medium,buy rating; target 2700
+5:55:55,5:57:27,ICICI Bank,ICICI Bank,Buy,,1650,,,,गौरांग,investment-12m,high,"top-5 recap: ICICI Bank buy, target 1650 (12 months)"
+5:55:55,5:57:27,CG Power (CG P),CG P,Buy,,1185,,,,गौरांग,investment-12m,medium,"top-5 recap: CG Power buy, target 1185 next 12 months"
+6:49:53,6:51:37,Vikran Engineering,विक विक्रान इंजीनियरिंग,Watch,50,64,,,,कविता,positional,low,Apr 2026 recovery zone 55-50 support; above 50 bounce hope; cross 64 more upside; FY27 revenue guidance ~2200cr; watch - no firm call
+6:54:57,6:56:01,Union Bank of India,यूनियन बैंक,Watch,,,,,,संतोष (Santosh),intraday-positional,high,"'short Union Bank, SL 174, target 170' - internally inconsistent as heard (SL below entry for a short); ASR-garbled; MANUAL REVIEW"
+6:54:57,6:56:01,Dr Reddys Laboratories,डॉ. रेड्डी; Farma space,Buy,,1240,,,1210,संतोष,intraday-positional,high,"defensive pharma; buy Dr Reddy SL 1210, target 1240"
+7:05:44,7:07:25,HPCL/IOCL/BPCL + cement/paints/tyres,,Weak,,,,,,,sector,low,crude boil - sectors to avoid; no call
+7:09:17,7:10:06,Nifty (index),निफ्टी,Sell,23000,22400,,,23000,नीलेश/निमेश,position,high,Nifty short only below 23000; SL 23000; target 22400; index - excluded from equity evaluation
+7:11:21,7:15:39,Nifty (index),निफ्टी,Watch,22500,22600,,,,(female expert),position,medium,longs only in 22600-22500 zone; no shorting (RR unfavourable); Bank Nifty below 55000 psychological; index - excluded
+7:32:33,7:33:57,Eicher Motors (probable),IC Motor?; I मोटर,Buy,,7600,,,7150,(male expert),positional,high,"top ~8100, correction to ~7360 near 200-DEMA; SL 7150, target 7600 fit EICHERMOT; ASR 'IC Motor' = Eicher phonetically"
+7:43:34,7:47:30,Bharti Airtel,B Airtel,Sell,1775,1730,1700,,1805,(expert),positional,high,lower-high at 1775; short 1775-1780; SL 1805; targets 1730 and 1700/20 ('18 1730' garbled)
+7:43:34,7:47:30,Torrent Pharmaceuticals (2nd),Tort Farma,Buy,,,,,,(same expert),positional,low,range trade since last... levels not captured in block excerpt
+7:54:31,7:55:41,Ashok Leyland,Ashok Leeland,Sell,156,147,,,159,गौरव शर्मा,positional-2-3d,high,"below averages, negative bias; short at 156, SL 159, target 147 in 2-3 days"
+8:05:30,8:06:25,Tata Motors PV (TMPV),TMPV Tata Motors,Weak,,,,,,,sector,low,top loser ~2%; no levels
+8:14:40,8:16:04,Jio Financial Services,Jio फाइनेंशियल,Weak,,,,219.6,,कुणाल?,positional,low,52-wk low 219.60; down 25% in a year; weak; no buy advice yet
+8:19:23,8:20:36,PB Fintech,PB fintech,Buy,,2310,,,(Bernstein brokerage),positional,medium,"Bernstein outperform, 91% upside, TP 2310; after big fall",
+8:19:23,8:20:36,GE Shipping (Great Eastern),जेईई शिपिंग; GE शिपिंग,Buy,,1965,,,(Nomura brokerage),positional,medium,Nomura initiates coverage TP 1965,
+8:23:02,8:24:49,Unidentified stock (एजेस हुआ पैक?),एजेस हुआ पैक?,Buy,,360,350,,280,(expert),positional,medium,"levels 350/360 SL 280; Aditya Vision trades 619 (mismatch) - name unresolved, MANUAL REVIEW"
+8:28:41,8:29:50,(market recap - no call),adानी erप्राइes; Apollo; Adani Ports; Titan; Eternal,,,,,,,sector,low,YTD gainers/losers recap; no actionable call,
+8:32:49,8:34:08,(market recap - no call),Tata Motors PV; Adani Enterprises; Jio Finance; Power Grid; L&T,,,,,,,sector,low,Nifty50 fallers recap; no call,
+8:35:25,8:37:36,Nifty (index),निफ्टी,Sell,22850,22500,22600,,23000,(निमेश?),positional,high,if rebound to 22850-22900 build shorts; SL 23000; targets 22600/22500; index - excluded
+8:48:08,8:49:09,(market recap - no call),Adani Ports; Titan; Eternal; Wipro; Infosys; TCS,,,,,,,sector,low,YTD recap repeat; no call,
+8:51:04,8:54:44,(sector recap),निफ्टी RT; Lodha; Brigade; DLF; Phoenix; Godrej,,,,,,,sector,low,realty sector down; Lodha -3.5% near 1100; no call,
+9:02:53,9:04:18,(market close recap),DRL; Infosys; HDFC L; Tata Motors PV; Adani; Jio,,,,,,,sector,low,Nifty closed 22780; no call,
+9:09:38,9:12:02,Zydus? / ZPTO?,ZPTO,Buy,,,,,,,unknown,low,garbled block; possibly crypto/ZPTO; skip
+9:32:41,9:35:20,Gold MCX (year view),,Sell,,137000,143000,175000,,brokers polled,year-view,low,brokerage poll gold year high/low; not a trade; excluded
+9:40:53,9:41:46,Gold MCX,,Buy,,175000,,,142000,रेनी जी (Reni),year-view,low,buy on dips toward 142000?? year target 175000; excluded (commodity)
+9:44:43,9:47:59,Gold MCX,,Buy,,188000,200000,,142000,रवि (Ravi),year-view,low,year-end 188000-200000 view; 142 good support; excluded (commodity)
+9:56:28,9:57:18,(unrelated/entertainment),,,,,,,,low,skipped,,
+10:53:05,10:56:00,MIDHANI (Mishra Dhatu Nigam),मददानी,Buy,,424,440,450,390,महेश जी (Mahesh),positional,high,"VIP shares segment; SL 390, targets 424/440/450 fit MIDHANI (close 405); phonetic match"
+10:53:05,10:56:00,Apollo Micro Systems,अपोलो माइक्रो,Buy,410,415,,,,महेश जी,positional,high,correction positive; buy range 410-415; further levels cut off in excerpt
+11:06:15,11:09:00,(medical tourism discussion),,,,,,,,low,MBT sector talk; no call,,
+11:35:12,11:38:00,(auto/EV market discussion),VinFast VF3; Hyundai EV; Mahindra Vision S; Tata Avinya,,,,,,,low,car market talk - not stock calls,,
+11:42:03,11:45:00,(car buying advice),Mercedes GLC; compact EVs,,,,,,,low,consumer advice; excluded,,
+4:39:00,4:45:00,Jindal Steel & Power,जडस,Buy,,1200,1225,1350,1160,,positional,medium,"consolidation-band breakout; accumulate around CMP (~1165), SL 1160, interim 1200-1225, positional targets 1350-1380"
+4:41:00,4:44:30,Petronet LNG,पेट्रोनेट,Buy,,302,305,,282,,positional,medium,technical call; levels 302/305 SL 282 fit Petronet (~287); block audio ambiguous between stocks
+4:45:55,4:47:58,Unidentified stock (sell on rise 1150-1170),Jindal Steel? Lodha?,Sell,1160,1100,,,1220,,positional,low,"'1150-1170 rebound pe shorting, SL 1220, 150 tak downside'; stock unresolved - MANUAL REVIEW"

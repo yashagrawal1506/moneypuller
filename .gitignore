@@ -1,0 +1,28 @@
+# --- secrets / local state ---
+data/moneypuller.db
+data/raw/articles/
+data/raw/prices/
+data/*.log
+data/scraped_ids.txt
+data/cutoff.txt
+data/anomaly_scan.txt
+data/strategy_analysis.txt
+data/~$*.xlsx
+
+# --- heavy generated artifacts (rebuilt by the pipeline) ---
+data/MoneyPuller_Prices_FY*.xlsx
+data/titan_*.xlsx
+data/titan_verdicts_poc.xlsx
+
+# --- python ---
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# stray raw HTML in raw root (not the cached articles dir)
+data/raw/*.html
+
+# generated site (rebuilt by CI)
+site/
+data/raw/*.xml
+data/raw/*.json
