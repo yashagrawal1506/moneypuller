@@ -186,6 +186,8 @@ font-size:13px;white-space:pre-wrap;line-height:1.55;margin:10px 0}
 .small{color:var(--tx2);font-size:12px}
 a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
 .alink{color:var(--tx2);font-weight:600;text-decoration:none;padding:2px 7px;border:1px solid var(--line);border-radius:6px;display:inline-block}.alink:hover{color:var(--blue);border-color:var(--blue)}
+.notice-body{color:var(--tx2);font-size:13px;line-height:1.6}.notice-body p{margin:8px 0}.notice-body b{color:var(--tx)}
+.btn{background:var(--blue);border:0;border-radius:8px;color:#fff;font:inherit;font-weight:600;padding:9px 18px;cursor:pointer;margin-top:10px}
 .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}
 .kv .card{padding:8px 10px}.kv .card .v{font-size:16px}
 .spark{height:36px}.flag-inline{color:var(--amber);font-weight:700}
@@ -223,6 +225,19 @@ a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
   <div class="tblwrap"><table id="tbl"></table></div>
   <div class="small" id="count" style="margin-top:8px"></div>
 </div>
+<div class="modal" id="notice">
+  <div class="mbox" style="max-width:640px">
+    <h2>Before you use this dashboard</h2>
+    <div class="notice-body">
+      <p><b>Not investment advice.</b> Nothing here is a recommendation to buy, sell or hold any security. Do your own research and consult a registered professional before acting on anything shown.</p>
+      <p><b>Independent tracking of public data only.</b> A personal, non-commercial research project that records recommendations already published by Moneycontrol's “Trade Spotlight” and tracks their outcomes against public price data. The original source link is provided for every lead.</p>
+      <p><b>No affiliation, no endorsement, no defamation.</b> The statistics shown are factual records of publicly published calls. They are not intended to defame, harm or endorse any analyst, media house or company.</p>
+      <p><b>No earnings.</b> This site is free, carries no ads or sponsorships, and its author earns nothing from it.</p>
+      <p class="small">Markets involve risk. Past outcomes of tracked calls are not indicative of future results.</p>
+    </div>
+    <button class="btn" id="noticeOk">I understand</button>
+  </div>
+</div>
 <div id="calibTab">
   <p class="small" style="margin:6px 0 12px">Each evening the confidence of every live lead is snapshotted.
   When a lead resolves, its last snapshot is compared with the outcome. Buckets fill up over time.</p>
@@ -244,7 +259,8 @@ const stShort = st => st === 'target achieved' ? 'TARGET' : st === 'SL achieved'
   st === 'NO HIT YET' ? 'LIVE' : st.startsWith('AMBIG') ? 'AMBIG' : st;
 
 $('#gen').textContent = 'Generated ' + DATA.generated + ' from data/moneypuller.db — ' +
-  L.length + ' dated leads. Click a stock for full detail; star it to follow.';
+  L.length + ' dated leads. Click a stock for full detail; star it to follow.' +
+  ' · Independent, non-commercial tracker of publicly published calls — not investment advice.';
 
 // KPI cards
 const settled = L.filter(l => l.st === 'target achieved' || l.st === 'SL achieved');
@@ -421,6 +437,10 @@ $('#exp').onclick = () => {
   aEl.download = 'moneypuller_view.csv';
   aEl.click();
 };
+
+// first-visit disclaimer overlay (once per browser session)
+try { if (!sessionStorage.getItem('mp_notice_ok')) $('#notice').classList.add('open'); } catch(e) { $('#notice').classList.add('open'); }
+$('#noticeOk').onclick = () => { $('#notice').classList.remove('open'); try { sessionStorage.setItem('mp_notice_ok','1'); } catch(e) {} };
 
 ['q','fst','fan','fflag'].forEach(id => { $('#' + id).oninput = render; $('#' + id).onchange = render; });
 render();
