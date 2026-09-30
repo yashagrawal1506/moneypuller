@@ -1,0 +1,88 @@
+name: morning-update
+
+on:
+  schedule:
+    - cron: "15 3 * * 1-5"   # 03:15 UTC = 08:45 IST, Mon-Fri (pre-market)
+  workflow_dispatch: {}        # manual run button
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: daily-update
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Same DB state as the evening run: rotating cache key with
+      # restore-keys picks the latest successful run's DB; the committed
+      # seed covers the very first run.
+      - name: Restore cached database
+        id: dbcache
+        uses: actions/cache@v4
+        with:
+          path: data/moneypuller.db
+          key: moneypuller-db-${{ github.run_id }}
+          restore-keys: moneypuller-db-
+
+      - name: Seed DB if cache was empty
+        if: steps.dbcache.outputs.cache-hit != 'true'
+        run: |
+          if [ ! -f data/moneypuller.db ] && [ -f data/db_seed.gz ]; then
+            echo "restoring DB from committed seed"
+            gunzip -c data/db_seed.gz > data/moneypuller.db
+          fi
+
+      # Morning run: scrape fresh articles + map symbols + verdicts +
+      # confidence + rebuild Excel/dashboard, but skip the OHLC fetch.
+      # Today's new leads publish as PENDING with a Confidence % so you
+      # can review them before the 9:15 open; all bars come in the
+      # 16:15 IST evening run.
+      - name: Run morning update (no price fetch)
+        env:
+          MP_PAUSE: "1.2"
+        run: python daily_update.py --cloud --no-fetch
+
+      - name: DB summary
+        run: >-
+          python -c "import sqlite3; conn = sqlite3.connect('data/moneypuller.db');
+          [print(n, conn.execute(q).fetchone()[0]) for n, q in [('articles',
+          'SELECT COUNT(*) FROM articles'), ('leads', 'SELECT COUNT(*) FROM
+          recommendations'), ('verdicts', 'SELECT COUNT(*) FROM verdicts')]]"
+
+      - name: Assemble site
+        run: python make_site.py
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy-pages:
+    needs: update
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
