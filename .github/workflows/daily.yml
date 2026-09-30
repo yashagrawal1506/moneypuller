@@ -58,20 +58,11 @@ jobs:
         run: python daily_update.py --cloud
 
       - name: DB summary
-        run: |
-          python - <<'EOF'
-          import sqlite3
-          conn = sqlite3.connect("data/moneypuller.db")
-          for name, q in [
-              ("articles", "SELECT COUNT(*) FROM articles"),
-              ("leads", "SELECT COUNT(*) FROM recommendations"),
-              ("verdicts", "SELECT COUNT(*) FROM verdicts"),
-          ]:
-              try:
-                  print(f"{name}: {conn.execute(q).fetchone()[0]}")
-              except Exception as e:
-                  print(f"{name}: ({e})")
-          EOF
+        run: >-
+          python -c "import sqlite3; conn = sqlite3.connect('data/moneypuller.db');
+          [print(n, conn.execute(q).fetchone()[0]) for n, q in [('articles',
+          'SELECT COUNT(*) FROM articles'), ('leads', 'SELECT COUNT(*) FROM
+          recommendations'), ('verdicts', 'SELECT COUNT(*) FROM verdicts')]]"
 
       - name: Assemble site
         run: python make_site.py
