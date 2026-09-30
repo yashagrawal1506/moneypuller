@@ -10,7 +10,8 @@ Features
   free-text search over stock / analyst / note
 - Sortable leads table with confidence bars and per-lead sparklines
 - Flag / follow any lead (persisted in the browser's localStorage)
-- Lead detail modal: full reasoning, byline, article link, confidence
+- Lead detail modal: paraphrased reasoning summary (verbatim text stays in
+  the DB only — copyright hygiene), byline, article link, confidence
   history from confidence_history, price closes since entry
 - Analyst scorecard (canonical names) and calibration view (confidence
   bucket vs realised hit rate, built from confidence_history over time)
@@ -19,12 +20,61 @@ Usage: python build_dashboard.py
 """
 
 import json
+import re
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 
 DB = Path("data/moneypuller.db")
 OUT = Path("data/dashboard.html")
+
+# ---------------------------------------------------------------------------
+# Reasoning paraphraser (copyright hygiene)
+# ---------------------------------------------------------------------------
+# The DB keeps the full verbatim article text (for strategy research), but
+# the public dashboard shows only a short, paraphrased summary of the
+# technical signals — never a verbatim excerpt of the article.
+
+_PATTERNS: list[tuple[str, tuple[str, ...]]] = [
+    ("trend", (r"\b(uptrend|downtrend|intermediate (?:up|down) trend|bullish trend|"
+               r"bearish trend|healthy (?:intermediate )?uptrend)\b")),
+    ("breakout", (r"\b(breakout|broke out|break[- ]?out of|breaks out)\b")),
+    ("pattern", (r"\b(inverse head and shoulders|head and shoulders|ascending triangle|"
+               r"descending triangle|symmetrical triangular|symmetric triangle|flag|"
+               r"pennant|rectangle|cup and handle|double bottom|double top)")),
+    ("moving avg", (r"\b(\d+[- ]?(?:day|week)[s]? (?:SMA|EMA|moving average)|"
+               r"\b(?:20|50|100|200)[- ]?(?:DMA|WMA)\b|(?:20|50|200)-week SMA)")),
+    ("MACD", (r"\b(MACD|moving average convergence divergence)\b")),
+    ("RSI", (r"\bRSI\b")),
+    ("volume support", (r"\b(above[- ]average volumes?|higher volumes?|volumes? (?:pickup|spike|expansion)|"
+               r"volume[- ]backed|backed by volumes?)\b")),
+    ("oversold", (r"\b(oversold|overbought)\b")),
+    ("support", (r"\b(demand (?:area|zone)|support(?: level| zone)?|scaled at support)\b")),
+    ("resistance", (r"\b(resistance(?: level| zone)?|supply (?:area|zone)|maximum pain)\b")),
+    ("momentum", (r"\b(bullish momentum|strong momentum|momentum (?:resumed|reversal)|fresh momentum)\b")),
+    ("SMA reclaim", (r"\b(bounced from|closed above|reclaimed)\b")),
+]
+
+_COMPILED = [(label, re.compile(pat, re.IGNORECASE)) for label, pats in _PATTERNS
+             for pat in (pats,)]
+
+
+def paraphrase_reasoning(raw: str | None) -> str:
+    """Short neutral summary of the technical signals in a lead's reasoning.
+    Extracts signal categories only; never returns verbatim article text."""
+    if not raw or not raw.strip():
+        return "-"
+    text = raw[:4000]
+    found: list[str] = []
+    for label, rx in _COMPILED:
+        if rx.search(text) and label not in found:
+            found.append(label)
+    stock_m = re.match(r"^([A-Z][A-Za-z&. ]{2,30}?)\s+(?:is|has|was|showed|displayed|provided)", text)
+    stock = stock_m.group(1).strip() if stock_m else "The stock"
+    if not found:
+        # Fall back to a minimal factual description, not a quote.
+        return f"Analyst cites a technical setup in {stock}; see the original article for details."
+    return f"{stock}: signals cited — {', '.join(found)}. See the original article for the full argument."
 
 
 def analyst_name(raw: str | None) -> str:
@@ -83,7 +133,7 @@ def main() -> None:
             "xl": l["exit_level"], "xd": l["exit_date"],
             "dy": l["days_taken"], "pct": l["pct"], "cf": l["confidence"],
             "nt": l["note"], "an": analyst_name(l["analyst"]),
-            "by": l["analyst"], "rs": (l["reasoning"] or "")[:1800],
+            "by": l["analyst"], "rs": paraphrase_reasoning(l["reasoning"]),
             "ti": l["title"], "u": l["url"], "h": hist.get(l["id"], []),
             "sr": series,
         })
@@ -376,7 +426,8 @@ function openModal(id) {
     ${l.sr&&l.sr.length>1?`<div style="margin:10px 0">${spark(l.sr.map((c,i)=>c), l.sr[l.sr.length-1]>=l.en?'#22c55e':'#ef4444')}<span class="small"> closes since entry (max 45 sessions, last ${l.sr[l.sr.length-1]})</span></div>`:''}
     <h2 style="font-size:14px;margin-top:12px">Confidence history</h2>${hist}
     <h2 style="font-size:14px;margin-top:12px">Analyst byline</h2><div class="small">${l.by||'-'}</div>
-    <h2 style="font-size:14px;margin-top:12px">Reasoning</h2><div class="reason">${l.rs||'-'}</div>
+    <h2 style="font-size:14px;margin-top:12px">Reasoning (paraphrased)</h2><div class="reason">${l.rs||'-'}</div>
+    <p class="small">Summary of the analyst's stated signals — the full verbatim text is not reproduced. Read the original article for the complete reasoning.</p>
     <p style="margin-top:10px"><a href="${l.u}" target="_blank" rel="noopener">Open the Moneycontrol article ↗</a></p>`;
   $('#modal').classList.add('open');
 }
