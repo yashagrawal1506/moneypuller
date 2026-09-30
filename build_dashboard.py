@@ -185,6 +185,7 @@ max-height:84vh;overflow:auto;padding:20px}
 font-size:13px;white-space:pre-wrap;line-height:1.55;margin:10px 0}
 .small{color:var(--tx2);font-size:12px}
 a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+.alink{color:var(--tx2);font-weight:600;text-decoration:none;padding:2px 7px;border:1px solid var(--line);border-radius:6px;display:inline-block}.alink:hover{color:var(--blue);border-color:var(--blue)}
 .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}
 .kv .card{padding:8px 10px}.kv .card .v{font-size:16px}
 .spark{height:36px}.flag-inline{color:var(--amber);font-weight:700}
@@ -303,7 +304,7 @@ function render() {
   const rows = view();
   const cols = [['','flag'],['Date','d'],['Stock','s'],['Act','a'],['CMP','cmp'],['T1','t1'],['SL','sl'],
     ['Status','st'],['Entry','en'],['Exit','ex'],['Level','xl'],['Days','dy'],['%age','pct'],
-    ['Conf','cf'],['Trend','sr'],['Analyst','an'],['','id']];
+    ['Conf','cf'],['Trend','sr'],['Analyst','an'],['Src','u'],['','id']];
   $('#tbl').innerHTML = '<thead><tr>' + cols.map(([h,k]) =>
     `<th data-k="${k}">${h}${sortKey===k?(sortDir<0?' ▾':' ▴'):''}</th>`).join('') + '</tr></thead><tbody>' +
     rows.map(l => `<tr class="${flags[l.id]?'flagged':''}">
@@ -316,6 +317,7 @@ function render() {
       <td class="${(l.pct??0)>=0?'pct-pos':'pct-neg'}">${fmtPct(l.pct)}</td>
       <td>${l.cf!=null?`<span class="cbar"><span class="cfill" style="width:${(l.cf*100).toFixed(0)}%"></span></span>${(100*l.cf).toFixed(0)}%`:'-'}</td>
       <td>${spark(l.sr)}</td><td>${l.an}</td>
+      <td>${l.u?`<a class="alink" href="${l.u}" target="_blank" rel="noopener" title="Open the Moneycontrol article in a new tab">MC ↗</a>`:'-'}</td>
       <td><span class="stock" data-id="${l.id}" style="color:var(--tx2)">detail</span></td>
     </tr>`).join('') + '</tbody>';
   $('#count').textContent = rows.length + ' of ' + L.length + ' leads shown · ' +
@@ -359,7 +361,7 @@ function openModal(id) {
     <h2 style="font-size:14px;margin-top:12px">Confidence history</h2>${hist}
     <h2 style="font-size:14px;margin-top:12px">Analyst byline</h2><div class="small">${l.by||'-'}</div>
     <h2 style="font-size:14px;margin-top:12px">Reasoning</h2><div class="reason">${l.rs||'-'}</div>
-    <p style="margin-top:10px"><a href="${l.u}" target="_blank">Open article ↗</a></p>`;
+    <p style="margin-top:10px"><a href="${l.u}" target="_blank" rel="noopener">Open the Moneycontrol article ↗</a></p>`;
   $('#modal').classList.add('open');
 }
 $('#modal').onclick = e => { if (e.target.id === 'modal') $('#modal').classList.remove('open'); };
@@ -410,9 +412,9 @@ function renderAnalysts() {
 // csv export of current view
 $('#exp').onclick = () => {
   const rows = view();
-  const head = 'date,stock,action,cmp,t1,t2,t3,sl,status,entry,exit,exit_level,exit_date,days,pct,confidence,analyst,flagged';
+  const head = 'date,stock,action,cmp,t1,t2,t3,sl,status,entry,exit,exit_level,exit_date,days,pct,confidence,analyst,flagged,article_url';
   const lines = rows.map(l => [l.d,l.s,l.a,l.cmp,l.t1,l.t2,l.t3,l.sl,stShort(l.st),
-    l.en,l.ex,l.xl,l.xd,l.dy,l.pct,l.cf,l.an,flags[l.id]?1:0].join(','));
+    l.en,l.ex,l.xl,l.xd,l.dy,l.pct,l.cf,l.an,flags[l.id]?1:0,l.u||''].join(','));
   const blob = new Blob([head + '\\n' + lines.join('\\n')], {type:'text/csv'});
   const aEl = document.createElement('a');
   aEl.href = URL.createObjectURL(blob);

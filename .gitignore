@@ -26,3 +26,6 @@ data/raw/*.html
 site/
 data/raw/*.xml
 data/raw/*.json
+
+# local-only convenience files
+serve_dashboard.bat
