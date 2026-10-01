@@ -1,9 +1,15 @@
 name: daily-update
 
+# Redundant slots: GitHub's cron scheduler regularly delays or skips single
+# slots. The first slot that runs after market close fetches OHLC and
+# publishes; the freshness guard makes later slots seconds-cheap no-ops.
 on:
   schedule:
-    - cron: "45 10 * * 1-5"   # 10:45 UTC = 16:15 IST, Mon-Fri (after close)
-  workflow_dispatch: {}        # manual run button
+    - cron: "45 10 * * 1-5"   # 16:15 IST primary (post-close)
+    - cron: "55 12 * * 1-5"   # 18:25 IST catch-up 1
+    - cron: "5 14 * * 1-5"    # 19:35 IST catch-up 2
+    - cron: "5 16 * * 1-5"    # 21:35 IST catch-up 3 (last of the evening)
+  workflow_dispatch: {}        # manual run button (bypasses the guard)
 
 permissions:
   contents: read
@@ -22,6 +28,8 @@ jobs:
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    outputs:
+      result: ${{ steps.guard.outputs.result }}
     steps:
       - uses: actions/checkout@v4
 
@@ -29,9 +37,6 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
 
       # --- DB state: actions cache (rotating key) with the committed seed
       # as day-1 fallback. restore-keys picks the latest successful run's
@@ -52,12 +57,40 @@ jobs:
             gunzip -c data/db_seed.gz > data/moneypuller.db
           fi
 
+      # Guard: if prices already include today's session (IST), the evening
+      # run already happened — skip. Manual dispatches bypass the guard.
+      - name: Freshness guard
+        id: guard
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            R=run-needed
+          else
+            R=$(python -c "
+            import sqlite3, datetime
+            try:
+                ist = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+                today = ist.strftime('%Y-%m-%d')
+                conn = sqlite3.connect('data/moneypuller.db')
+                n = conn.execute('SELECT COUNT(*) FROM prices WHERE date = ?', (today,)).fetchone()[0]
+                print('already-done' if n else 'run-needed')
+            except Exception:
+                print('run-needed')")
+          fi
+          echo "result=$R" >> "$GITHUB_OUTPUT"
+          echo "evening guard: $R"
+
+      - name: Install dependencies
+        if: steps.guard.outputs.result == 'run-needed'
+        run: pip install -r requirements.txt
+
       - name: Run daily update (cloud mode)
+        if: steps.guard.outputs.result == 'run-needed'
         env:
           MP_PAUSE: "1.2"
         run: python daily_update.py --cloud
 
       - name: DB summary
+        if: steps.guard.outputs.result == 'run-needed'
         run: >-
           python -c "import sqlite3; conn = sqlite3.connect('data/moneypuller.db');
           [print(n, conn.execute(q).fetchone()[0]) for n, q in [('articles',
@@ -65,15 +98,18 @@ jobs:
           recommendations'), ('verdicts', 'SELECT COUNT(*) FROM verdicts')]]"
 
       - name: Assemble site
+        if: steps.guard.outputs.result == 'run-needed'
         run: python make_site.py
 
       - name: Upload Pages artifact
+        if: steps.guard.outputs.result == 'run-needed'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
   deploy-pages:
     needs: update
+    if: needs.update.outputs.result == 'run-needed'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

@@ -1,8 +1,13 @@
 name: morning-update
 
+# Redundant slots: GitHub's cron scheduler regularly delays or skips single
+# slots under load. The first slot that actually runs does the work; the
+# freshness guard makes every later slot a seconds-cheap no-op.
 on:
   schedule:
-    - cron: "15 3 * * 1-5"   # 03:15 UTC = 08:45 IST, Mon-Fri (pre-market)
+    - cron: "15 3 * * 1-5"   # 08:45 IST primary (pre-market)
+    - cron: "5 4 * * 1-5"    # 09:35 IST catch-up 1
+    - cron: "35 5 * * 1-5"   # 11:05 IST catch-up 2 (last of the morning)
   workflow_dispatch: {}        # manual run button
 
 permissions:
@@ -22,6 +27,8 @@ jobs:
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    outputs:
+      result: ${{ steps.guard.outputs.result }}
     steps:
       - uses: actions/checkout@v4
 
@@ -29,9 +36,6 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
 
       # Same DB state as the evening run: rotating cache key with
       # restore-keys picks the latest successful run's DB; the committed
@@ -52,17 +56,41 @@ jobs:
             gunzip -c data/db_seed.gz > data/moneypuller.db
           fi
 
+      # Guard: if any article was already fetched today (IST), a previous
+      # slot did the morning work — skip the whole run.
+      - name: Freshness guard
+        id: guard
+        run: |
+          R=$(python -c "
+          import sqlite3, datetime
+          try:
+              ist = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+              today = ist.strftime('%Y-%m-%d')
+              conn = sqlite3.connect('data/moneypuller.db')
+              n = conn.execute('SELECT COUNT(*) FROM articles WHERE substr(fetched_at,1,10) >= ?', (today,)).fetchone()[0]
+              print('already-done' if n else 'run-needed')
+          except Exception:
+              print('run-needed')")
+          echo "result=$R" >> "$GITHUB_OUTPUT"
+          echo "morning guard: $R"
+
+      - name: Install dependencies
+        if: steps.guard.outputs.result == 'run-needed'
+        run: pip install -r requirements.txt
+
       # Morning run: scrape fresh articles + map symbols + verdicts +
       # confidence + rebuild Excel/dashboard, but skip the OHLC fetch.
       # Today's new leads publish as PENDING with a Confidence % so you
       # can review them before the 9:15 open; all bars come in the
-      # 16:15 IST evening run.
+      # evening run.
       - name: Run morning update (no price fetch)
+        if: steps.guard.outputs.result == 'run-needed'
         env:
           MP_PAUSE: "1.2"
         run: python daily_update.py --cloud --no-fetch
 
       - name: DB summary
+        if: steps.guard.outputs.result == 'run-needed'
         run: >-
           python -c "import sqlite3; conn = sqlite3.connect('data/moneypuller.db');
           [print(n, conn.execute(q).fetchone()[0]) for n, q in [('articles',
@@ -70,15 +98,18 @@ jobs:
           recommendations'), ('verdicts', 'SELECT COUNT(*) FROM verdicts')]]"
 
       - name: Assemble site
+        if: steps.guard.outputs.result == 'run-needed'
         run: python make_site.py
 
       - name: Upload Pages artifact
+        if: steps.guard.outputs.result == 'run-needed'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
   deploy-pages:
     needs: update
+    if: needs.update.outputs.result == 'run-needed'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
