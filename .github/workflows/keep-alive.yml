@@ -1,15 +1,16 @@
 name: keep-alive
 
 # GitHub auto-disables scheduled workflows in public repos after 60 days
-# without repository activity. This job makes one empty commit on the 1st
-# of every month, resetting that clock so the morning/evening crons never
-# stop. The commit changes no files and cannot trigger the other workflows
-# (they have no push triggers).
+# without repository activity. Weekly slots + a guard make this immune to
+# GitHub's cron skips: if a slot is skipped or delayed, the next one still
+# runs, and the guard ensures only ONE empty commit lands roughly per month
+# (only when the newest commit is older than 20 days).
 
 on:
   schedule:
-    - cron: "30 0 1 * *"   # 00:30 UTC on the 1st = 06:00 IST, monthly
-  workflow_dispatch: {}      # manual run button for testing
+    - cron: "30 0 * * 1"   # Mondays 06:00 IST
+    - cron: "30 0 * * 4"   # Thursdays 06:00 IST (backup slot)
+  workflow_dispatch: {}      # manual run (bypasses the guard, for testing)
 
 permissions:
   contents: write
@@ -24,10 +25,25 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Guard — commit only if last commit is >20 days old
+        id: guard
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "result=run-needed" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          LAST=$(git log -1 --format=%ct)
+          NOW=$(date +%s)
+          AGE=$(( (NOW - LAST) / 86400 ))
+          echo "last commit age: ${AGE} days"
+          if [ "$AGE" -gt 20 ]; then
+            echo "result=run-needed" >> "$GITHUB_OUTPUT"
+          else
+            echo "result=already-done" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Keep-alive commit
+        if: steps.guard.outputs.result == 'run-needed'
         run: |
           git config user.name  "MoneyPuller"
           git config user.email "moneypuller@users.noreply.github.com"
