@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 name: daily-update
 
 # Redundant slots: GitHub's cron scheduler regularly delays or skips single
