@@ -38,19 +38,16 @@ jobs:
           python-version: "3.13"
           cache: pip
 
-      # --- DB state: actions cache (rotating key) with the committed seed
-      # as day-1 fallback. restore-keys picks the latest successful run's
-      # DB even though the exact key (run_id) differs each time.
-      - name: Restore cached database
-        id: dbcache
-        uses: actions/cache@v4
-        with:
-          path: data/moneypuller.db
-          key: moneypuller-db-${{ github.run_id }}
-          restore-keys: moneypuller-db-
+      # Install every dependency (incl. yfinance and the text-extraction
+      # libs) so the runner never falls back to a stale pre-installed
+      # openpyxl that would silently corrupt the exports.
+      - name: Install dependencies
+        run: pip install --disable-pip-version-check -r requirements.txt
 
-      - name: Seed DB if cache was empty
-        if: steps.dbcache.outputs.cache-hit != 'true'
+      # DB state: build from the committed seed inside the runner
+      # instead of syncing a GitHub cache. The seed is the day-1
+      # fallback; all subsequent runs append to it.
+      - name: Restore DB from seed if missing
         run: |
           if [ ! -f data/moneypuller.db ] && [ -f data/db_seed.gz ]; then
             echo "restoring DB from committed seed"
@@ -78,10 +75,6 @@ jobs:
           fi
           echo "result=$R" >> "$GITHUB_OUTPUT"
           echo "evening guard: $R"
-
-      - name: Install dependencies
-        if: steps.guard.outputs.result == 'run-needed'
-        run: pip install -r requirements.txt
 
       - name: Run daily update (cloud mode)
         if: steps.guard.outputs.result == 'run-needed'

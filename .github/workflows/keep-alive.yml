@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: keep-alive
@@ -48,4 +49,16 @@ jobs:
           git config user.name  "MoneyPuller"
           git config user.email "moneypuller@users.noreply.github.com"
           git commit --allow-empty -m "chore: monthly keep-alive (reset 60-day workflow inactivity clock)"
-          git push
+          # GitHub's push for actions is always the GITHUB_TOKEN, whose
+          # default scope is `contents: write` on the default `GITHUB_TOKEN`
+          # and `issues: write` when `permissions.issues.write` is declared.
+          # The GITHUB_TOKEN is scoped to the repo and cannot be factored out,
+          # so we use `gh` with a fine-grained PAT stored in the repo secret
+          # GH_PAT. That token has `contents: write` on this repository.
+          if [ -n "${{ secrets.GH_PAT }}" ]; then
+            git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/yashagrawal1506/moneypuller.git
+            git push origin HEAD:main
+          else
+            echo "GH_PAT secret not set — keep-alive commit skipped. Add it in Settings > Secrets and variables > Actions > New repository secret (name: GH_PAT, value: a fine-grained PAT with Contents: Write)."
+            exit 1
+          fi
