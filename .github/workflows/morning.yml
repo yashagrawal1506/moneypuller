@@ -44,17 +44,17 @@ jobs:
       - name: Install dependencies
         run: pip install --disable-pip-version-check -r requirements.txt
 
-      # DB state: build from the committed seed inside the runner
-      # instead of syncing a GitHub cache. The seed is the day-1
-      # fallback; all subsequent runs append to it.
-      - name: Restore DB from seed if missing
+      # DB state: rebuild from the committed seed every run so the
+      # committed DB matches what the site serves (no divergence between
+      # the seed and the DB the dashboard is generated from).
+      - name: Restore DB from seed
         run: |
-          if [ ! -f data/moneypuller.db ] && [ -f data/db_seed.gz ]; then
-            echo "restoring DB from committed seed"
-            gunzip -c data/db_seed.gz > data/moneypuller.db
-          fi
+          echo "restoring DB from committed seed"
+          gunzip -c data/db_seed.gz > data/moneypuller.db
 
       # Guard: if any article was already fetched today (IST), a previous
+      # slot did the morning work — skip the whole run.
+      - name: Freshness guard
       # slot did the morning work — skip the whole run.
       - name: Freshness guard
         id: guard
