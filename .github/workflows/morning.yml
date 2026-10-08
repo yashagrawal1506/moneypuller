@@ -51,7 +51,9 @@ jobs:
           else
             echo "cache miss - restoring DB from committed seed"
             gunzip -c data/db_seed.gz > data/moneypuller.db
-          fi      - name: DB provenance
+          fi
+
+      - name: DB provenance
         run: python -c "import sqlite3; conn = sqlite3.connect('data/moneypuller.db'); print('articles', conn.execute('SELECT COUNT(*) FROM articles').fetchone()[0], '| newest article', conn.execute('SELECT MAX(substr(fetched_at,1,10)) FROM articles').fetchone()[0])"
 
       # Idempotent patch: restores the Oct 6-7, 2026 articles that were lost
