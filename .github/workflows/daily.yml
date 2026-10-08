@@ -33,19 +33,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Persist the DB between runs: each run saves its updated DB under a
+      # key unique to the run; the next run restores the newest entry via
+      # the db-v1- prefix. The committed seed is the cold-start fallback.
+      - name: Restore DB from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: data/moneypuller.db
+          key: db-v1-${{ github.run_id }}
+          restore-keys: |
+            db-v1-
+            moneypuller-db-
+
+      - name: Seed DB if cache missed
+        run: |
+          if [ -f data/moneypuller.db ]; then
+            echo "DB restored from cache: $(du -h data/moneypuller.db | cut -f1)"
+          else
+            echo "cache miss - restoring DB from committed seed"
+            gunzip -c data/db_seed.gz > data/moneypuller.db
+          fi
+
+      - name: DB provenance
+        run: python -c "import sqlite3; conn = sqlite3.connect('data/moneypuller.db'); print('articles', conn.execute('SELECT COUNT(*) FROM articles').fetchone()[0], '| newest article', conn.execute('SELECT MAX(substr(fetched_at,1,10)) FROM articles').fetchone()[0])"
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
 
       - name: Install dependencies
         run: pip install --disable-pip-version-check -r requirements.txt
-
-      # Rebuild the DB from the committed seed every run so the committed
-      # DB matches what the site serves (no seed/DB divergence).
-      - name: Restore DB from seed
-        run: |
-          echo "restoring DB from committed seed"
-          gunzip -c data/db_seed.gz > data/moneypuller.db
 
       # Guard: if prices already include today's session (IST), the evening
       # run already happened — skip. Manual dispatches bypass the guard.
@@ -83,6 +100,15 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
+      # Hand today's updated DB to the next run (prefix restore picks the
+      # newest db-v1-* entry). Skipped when the guard short-circuited.
+      - name: Save DB to cache
+        if: steps.guard.outputs.result == 'run-needed'
+        uses: actions/cache/save@v4
+        with:
+          path: data/moneypuller.db
+          key: db-v1-${{ github.run_id }}
 
   deploy-pages:
     needs: update
